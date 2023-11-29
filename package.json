@@ -1,0 +1,19 @@
+{
+  "name": "phase_0",
+  "version": "1.0.0",
+  "description": "this is phase 0 for project.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jainish",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2",
+    "express-validators": "^1.0.4",
+    "mongoose": "^8.0.2"
+  }
+}
