@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 mongoose.connect(database.url);
 
-var Movies = require("./models/movies");
+var Movie = require("./models/movie");
 
 // use handlebars as view engine
 app.engine(
@@ -30,7 +30,7 @@ app.set("view engine", "hbs");
 //get all employee data from db
 app.get("/", function (req, res) {
   // use mongoose to get all todos in the database
-  Movies.find()
+  Movie.find()
     .exec()
     .then((movies) => {
       // send data
