@@ -1,0 +1,20 @@
+<div class="viewData">
+
+  <h1>Movies Information</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Year</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each movies}}
+        <tr>
+          <td>{{this.plot?}}</td>
+          <td>{{this.year?}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

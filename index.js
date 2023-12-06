@@ -1,46 +1,40 @@
-var express = require("express");
-var mongoose = require("mongoose");
-var app = express();
-var database = require("./config/database");
-var bodyParser = require("body-parser");
+const express = require("express");
+const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
-var path = require("path");
+const path = require("path");
+const cors = require("cors");
 
-var port = process.env.PORT || 8000;
-app.use(bodyParser.urlencoded({ extended: "true" }));
+const db = require("./config/database");
+const movieRoutes = require("./routes/movieRoutes");
+
+require("dotenv").config();
+
+const app = express();
+const port = process.env.PORT || 8000;
+const dbUrl = process.env.DB_URL;
+
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.json({ type: "application/vnd.api+json" }));
-
-// serve static file from 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
+app.use(cors());
 
-mongoose.connect(database.url);
-
-var Movie = require("./models/movie");
-
-// use handlebars as view engine
-app.engine(
-  ".hbs",
-  exphbs.engine({
-    extname: ".hbs",
-  })
-);
+// Set up Handlebars as the view engine
+app.engine(".hbs", exphbs.engine({ extname: ".hbs" }));
 app.set("view engine", "hbs");
 
-//get all employee data from db
-app.get("/", function (req, res) {
-  // use mongoose to get all todos in the database
-  Movie.find()
-    .exec()
-    .then((movies) => {
-      // send data
-      res.json(employees);
-    })
-    .catch((err) => {
-      // send the error
-      res.send(err);
-    });
-});
+// Connect to the database and start the server
+db.initialize(dbUrl)
+  .then(() => {
+    // Set up routes
+    app.use("/api/movies", movieRoutes);
 
-app.listen(port);
-console.log("App listening on port : " + port);
+    // Start the server
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Error connecting to the database:", err);
+  });
