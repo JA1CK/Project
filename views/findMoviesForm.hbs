@@ -1,23 +1,74 @@
-<title>Find InvoiceNo</title>
+<div class="noData">
 
-<form method="POST" action="/api/movies/search/">
-  <input
-    type="text"
-    name="page"
-    placeholder="Enter Page No"
-    id="page"
-  />
-  <input
-    type="text"
-    name="perPage"
-    placeholder="Enter Per Page"
-    id="perPage"
-  />
-  <input
-    type="text"
-    name="title"
-    placeholder="Enter Title"
-    id="title"
-  />
-  <input type="submit" value="search" />
-</form>
+  <title>Find InvoiceNo</title>
+
+  <form method="GET" action="/api/movies/show/cards">
+    <input type="text" name="page" placeholder="Enter Page No" id="page" />
+    <input
+      type="text"
+      name="perPage"
+      placeholder="Enter Per Page"
+      id="perPage"
+    />
+    <input type="text" name="title" placeholder="Enter Title" id="title" />
+    <input type="submit" value="search" value="undefined" />
+    <input type="text" value="ok" name="show" id="show" hidden />
+  </form>
+</div>
+
+{{#if viewData}}
+  <div class="movie-card-container">
+
+    {{#each movies}}
+      <div class="card">
+        <img src={{this.poster}} alt="Movie Poster" />
+        <div class="card-content">
+          <div class="card-title">{{this.title}}</div>
+          <div class="card-details"><strong>ID:</strong> {{this._id}}</div>
+          <div class="card-details">
+            <p><strong>Plot:</strong>
+              {{this.plot}}</p>
+            <p><strong>Full Plot:</strong>
+              {{this.fullplot}}</p>
+            <p><strong>Genres:</strong> {{this.genres}}</p>
+            <p><strong>Runtime:</strong> {{this.runtime}}</p>
+            <p><strong>Release Year:</strong> {{this.year}}</p>
+            <p><strong>Languages:</strong> {{this.languages}}</p>
+            <p><strong>Directors:</strong> {{this.directors}}</p>
+            <p><strong>Casts:</strong> {{this.cast}}</p>
+            <p><strong>Rated:</strong> {{this.rated}}</p>
+            <p><strong>Awards:</strong> {{this.awards}}</p>
+            <p><strong>IMDb ID:</strong> {{this.imdb.id}}</p>
+            <p><strong>IMDb Rating:</strong>
+              {{this.imdb.rating}}
+              (Votes:
+              {{this.imdb.votes}})</p>
+            <p><strong>Rotten Tomatoes:</strong>
+              Viewer Rating:
+              {{this.tomatoes.viewer.rating}}
+              (Num Reviews:
+              {{this.tomatoes.viewer.numReviews}}) (Meter:
+              {{this.tomatoes.viewer.meter}})</p>
+            <p><strong>Rotten Tomatoes Critic Rating:</strong>
+              {{this.tomatoes.critic.rating}}
+              (Num Reviews:
+              {{this.tomatoes.critic.numReviews}}) (Meter:
+              {{this.tomatoes.critic.meter}})</p>
+            <p><strong>Rotten Tomatoes Fresh:</strong>
+              {{this.tomatoes.fresh}}</p>
+            <p><strong>Rotten Tomatoes Rotten:</strong>
+              {{this.tomatoes.rotten}}</p>
+            <p><strong>Tomatoes Last Updated:</strong>
+              {{this.tomatoes.lastUpdated}}</p>
+            <p><strong>Countries:</strong> {{this.countries}}</p>
+            <p><strong>Type:</strong> {{this.type}}</p>
+            <p><strong>Last Updated (Date):</strong>
+              {{this.lastupdated}}</p>
+            <p><strong>Num MFlix Comments:</strong>
+              {{this.num_mflix_comments}}</p>
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+{{/if}}

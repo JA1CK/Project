@@ -21,7 +21,16 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 
 // Set up Handlebars as the view engine
-app.engine(".hbs", exphbs.engine({ extname: ".hbs" }));
+app.engine(
+  ".hbs",
+  exphbs.engine({
+    extname: ".hbs",
+    runtimeOptions: {
+      allowProtoPropertiesByDefault: true,
+      allowProtoMethodsByDefault: true,
+    }
+  })
+);
 app.set("view engine", "hbs");
 
 // Connect to the database and start the server

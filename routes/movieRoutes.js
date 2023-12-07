@@ -3,6 +3,8 @@ const router = express.Router();
 const db = require("../config/database");
 const { check, validationResult } = require("express-validator");
 
+
+
 // Middleware to validate query parameters
 const validateQueryParams = [
   check("page").optional().isInt().toInt(),
@@ -16,6 +18,7 @@ const validateQueryParams = [
     next();
   },
 ];
+
 
 router.use("/api/movies/", (req, res, next) => {
   next();
@@ -48,33 +51,36 @@ router
   });
 
 
-// /api/movies
+// /api/movies/search/
 router
   .route("/search")
   .get((req, res) => {
     try {
-      res.status(200).render("findMoviesForm");
-    } catch (err) {
-      console.error("Error fetching movies:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  })
-  .post(validateQueryParams, async (req, res) => {
-    try {
-      console.log(req.body);
-      const page = parseInt(req.body.page) || 1;
-      const perPage = parseInt(req.body.perPage) || 10;
-      const title = req.body.title || null;
-
-      const movies = await db.getAllMovies(page, perPage, title);
-      console.log(movies);
-      res.status(200).render("Working in Progress!!");
+      res.status(200).render("findMoviesForm", {viewData:false});
     } catch (err) {
       console.error("Error fetching movies:", err);
       res.status(500).json({ error: "Internal Server Error" });
     }
   });
 
+// /api/movies/show/cards/
+router
+  .route("/show/cards")
+  .get(async (req, res) => {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const perPage = parseInt(req.query.perPage) || 10;
+      const title = req.query.title || null;
+
+      const movies = await db.getAllMovies(page, perPage, title);
+      res.status(200).render("findMoviesForm",{movies:movies, viewData:true});
+    } catch (err) {
+      console.error("Error fetching movies:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
+  
 
 // /api/movies/:id
 router
