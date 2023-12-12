@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Movie = require("../models/movie");
+const User = require("../models/user");
 
 const db = {
   initialize: async (url) => {
@@ -11,6 +12,7 @@ const db = {
     }
   },
 
+  // movies methods
   addNewMovie: (data) => {
     const newMovie = new Movie(data);
     return newMovie.save();
@@ -37,6 +39,24 @@ const db = {
 
   deleteMovieById: (id) => {
     return Movie.findByIdAndDelete(id).exec();
+  },
+
+  // Users methods
+  addNewUser: (data) => {
+    const newUser = new User(data);
+    return newUser.save();
+  },
+  
+  getUserByName: (data) => {
+    return User.findOne({ "username":data }).exec();
+  },
+
+  getAllUsers: () => {
+    return User.find();
+  },
+
+  approveUser: (data) => {
+    return User.findByIdAndUpdate(data.id, data, { new: true }).exec();
   }
 };
 

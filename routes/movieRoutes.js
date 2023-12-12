@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/database");
 const { check, validationResult } = require("express-validator");
+const auth = require("../middleware/auth");
 
 
 
@@ -27,7 +28,7 @@ router.use("/api/movies/", (req, res, next) => {
 // /api/movies
 router
   .route("/")
-  .get(validateQueryParams,async (req, res) => {
+  .get(validateQueryParams, async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
       const perPage = parseInt(req.query.perPage) || 10;
@@ -40,7 +41,7 @@ router
       res.status(500).json({ error: "Internal Server Error" });
     }
   })
-  .post(async (req, res) => {
+  .post(auth, async (req, res) => {
     try {
       const newMovie = await db.addNewMovie(req.body);
       res.status(201).json(newMovie);
@@ -98,7 +99,7 @@ router
       res.status(500).json({ error: "Internal Server Error" });
     }
   })
-  .put(async (req, res) => {
+  .put(auth, async (req, res) => {
     try {
       const updatedMovie = await db.updateMovieById(req.body, req.params.id);
       if (updatedMovie) {
@@ -111,7 +112,7 @@ router
       res.status(500).json({ error: "Internal Server Error" });
     }
   })
-  .delete(async (req, res) => {
+  .delete(auth, async (req, res) => {
     try {
       const deletedMovie = await db.deleteMovieById(req.params.id);
       if (deletedMovie) {

@@ -6,6 +6,7 @@ const cors = require("cors");
 
 const db = require("./config/database");
 const movieRoutes = require("./routes/movieRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 require("dotenv").config();
 
@@ -33,12 +34,15 @@ app.engine(
 );
 app.set("view engine", "hbs");
 
-// Connect to the database and start the server
-db.initialize(dbUrl)
+// Connect to both databases and start the server
+Promise.all([
+  db.initialize(dbUrl)
+])
   .then(() => {
     // Set up routes
     app.use("/api/movies", movieRoutes);
-
+    app.use("/api/users", userRoutes);
+    
     // Start the server
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
