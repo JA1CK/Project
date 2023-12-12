@@ -41,6 +41,22 @@ const db = {
     return Movie.findByIdAndDelete(id).exec();
   },
 
+  getAllMoviesSorted: async (page, perPage, title, sortField, order) => {
+    let sortOptions = { [sortField]: 1 }; // 1 for ascending, -1 for descending
+    if(order == "desc") {
+      sortOptions = { [sortField]: -1 }; // 1 for ascending, -1 for descending
+    }
+    const query = title ? { title: title } : {};
+
+    const movies = await Movie.find(query)
+      .sort(sortOptions)
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .exec();
+  
+    return movies;
+  },
+
   // Users methods
   addNewUser: (data) => {
     const newUser = new User(data);

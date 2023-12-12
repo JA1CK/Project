@@ -126,4 +126,38 @@ router
     }
   });
 
+
+// added new Route which can sort the data according to give field and given order
+// /api/movies/sorted
+router
+  .route("/get/sorted")
+  .get(async (req, res) => {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const perPage = parseInt(req.query.perPage) || 10;
+      const title = req.query.title || null;
+  
+      let movies, order;
+  
+      // Check if sort parameter is provided
+      if (req.query.sort) {
+        // Use the sort parameter if provided
+        const sortField = req.query.sort;
+        if(req.query.order){
+          order = req.query.order;
+        }
+        movies = await db.getAllMoviesSorted(page, perPage, title, sortField, order);
+      } else {
+        // Use the default sorting logic
+        movies = await db.getAllMovies(page, perPage, title);
+      }
+  
+      res.status(200).json(movies);
+    } catch (err) {
+      console.error("Error fetching movies:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
+
 module.exports = router;
