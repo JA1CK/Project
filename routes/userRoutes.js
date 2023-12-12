@@ -97,56 +97,6 @@ router
     } catch (err) {
       console.log(err);
     }
-  });
-
-
-// /api/users/admin/view
-router
-  .route("/admin/view")
-  .get(validateQueryParams, async (req, res) => {
-    try {
-      // Get user input
-      const { username, password } = req.body;
-  
-      // Validate if user exist in our database
-      const user = await db.getUserByName(username);
-  
-      if (user && user.approved && user.admin && (await bcrypt.compare(password, user.password))) {
-        const users = await db.getAllUsers();
-        return res.status(200).send(users);
-      }
-      
-      return res.status(400).send("Invalid Credentials");
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
-
-// /api/users/admin/approve
-router
-  .route("/admin/approve")
-  .put(validateQueryParams, async (req, res) => {
-    try {
-      // Get user input
-      const { username, password, uname } = req.body;
-  
-      // Validate if user exist in our database
-      const admin = await db.getUserByName(username);
-  
-      if (admin && admin.approved && admin.admin && (await bcrypt.compare(password, admin.password))) {
-        
-        const user = await db.getUserByName(uname);
-        user.approved = !user.approved;
-        updatedUser = await db.approveUser(user);
-        return res.status(200).send(updatedUser);
-      }
-      
-      return res.status(400).send("Invalid Credentials");
-    } catch (err) {
-      console.log(err);
-    }
-  });
-  
+  });  
 
 module.exports = router;

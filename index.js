@@ -7,6 +7,7 @@ const cors = require("cors");
 const db = require("./config/database");
 const movieRoutes = require("./routes/movieRoutes");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 require("dotenv").config();
 
@@ -35,13 +36,12 @@ app.engine(
 app.set("view engine", "hbs");
 
 // Connect to both databases and start the server
-Promise.all([
-  db.initialize(dbUrl)
-])
+db.initialize(dbUrl)
   .then(() => {
     // Set up routes
     app.use("/api/movies", movieRoutes);
     app.use("/api/users", userRoutes);
+    app.use("/api/admin", adminRoutes);
     
     // Start the server
     app.listen(port, () => {
