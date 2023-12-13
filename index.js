@@ -35,7 +35,7 @@ app.engine(
 );
 app.set("view engine", "hbs");
 
-// Connect to both databases and start the server
+// Connect to databases and start the server
 db.initialize(dbUrl)
   .then(() => {
     // Set up routes
