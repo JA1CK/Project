@@ -1,12 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const exphbs = require("express-handlebars");
 const path = require("path");
 const cors = require("cors");
 
 const db = require("./config/database");
-const movieRoutes = require("./routes/movieRoutes");
 const userRoutes = require("./routes/userRoutes");
+const restaurantRoutes = require("./routes/restaurantRoutes");
+const menuRoutes = require("./routes/menuRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
 require("dotenv").config();
@@ -22,24 +22,12 @@ app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 
-// Set up Handlebars as the view engine
-app.engine(
-  ".hbs",
-  exphbs.engine({
-    extname: ".hbs",
-    runtimeOptions: {
-      allowProtoPropertiesByDefault: true,
-      allowProtoMethodsByDefault: true,
-    }
-  })
-);
-app.set("view engine", "hbs");
-
 // Connect to databases and start the server
 db.initialize(dbUrl)
   .then(() => {
     // Set up routes
-    app.use("/api/movies", movieRoutes);
+    app.use("/api/restaurants", restaurantRoutes);
+    app.use("/api/menus", menuRoutes);
     app.use("/api/users", userRoutes);
     app.use("/api/admin", adminRoutes);
     

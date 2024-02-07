@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Movie = require("../models/movie");
 const User = require("../models/user");
+const Restaurant = require("../models/restaurant");
 
 const db = {
   initialize: async (url) => {
@@ -12,49 +12,153 @@ const db = {
     }
   },
 
-  // movies methods
-  addNewMovie: (data) => {
-    const newMovie = new Movie(data);
-    return newMovie.save();
+  // Restaurant methods
+  addNewRestaurant: (data) => {
+    const newRestaurant = new Restaurant(data);
+    return newRestaurant.save();
   },
 
-  getAllMovies: (page, perPage, title) => {
-    const query = title ? { title: title } : {};
+  getAllRestaurants: (page, perPage, name) => {
+    const query = name ? { name: { $regex: new RegExp(name, "i") } } : {};
     const skip = (page - 1) * perPage;
 
-    return Movie.find(query)
+    return Restaurant.find(query)
       .sort({ _id: 1 })
       .skip(skip)
       .limit(perPage)
       .exec();
   },
 
-  getMovieById: (id) => {
-    return Movie.findById(id).exec();
+  getRestaurantById: (restaurantId) => {
+    return Restaurant.findOne({ restaurantId }).exec();
   },
 
-  updateMovieById: (data, id) => {
-    return Movie.findByIdAndUpdate(id, data, { new: true }).exec();
+  updateRestaurantById: (data, restaurantId) => {
+    return Restaurant.findOneAndUpdate({ restaurantId }, data, {
+      new: true,
+    }).exec();
   },
 
-  deleteMovieById: (id) => {
-    return Movie.findByIdAndDelete(id).exec();
+  deleteRestaurantById: (restaurantId) => {
+    return Restaurant.findOneAndDelete({ restaurantId }).exec();
   },
 
-  getAllMoviesSorted: async (page, perPage, title, sortField, order) => {
+  getAllRestaurantsSorted: async (page, perPage, name, sortField, order) => {
     let sortOptions = { [sortField]: 1 }; // 1 for ascending, -1 for descending
-    if(order == "desc") {
+    if (order == "desc") {
       sortOptions = { [sortField]: -1 }; // 1 for ascending, -1 for descending
     }
-    const query = title ? { title: title } : {};
+    const query = name ? { name: { $regex: new RegExp(name, "i") } } : {};
 
-    const movies = await Movie.find(query)
+    const restaurants = await Restaurant.find(query)
       .sort(sortOptions)
       .skip((page - 1) * perPage)
       .limit(perPage)
       .exec();
-  
-    return movies;
+
+    return restaurants;
+  },
+
+  addMenuItemToRestaurant: async (restaurantId, menuItemData) => {
+    try {
+      const restaurant = await Restaurant.findOne({ restaurantId });
+      if (!restaurant) {
+        return "Restaurant not found";
+      }
+
+      restaurant.menu.push(menuItemData);
+      await restaurant.save();
+      return restaurant.menu[restaurant.menu.length - 1]; // Return the newly added menu item
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // Get all menu items from a restaurant
+  getAllMenuItemsByRestaurantId: async (restaurantId) => {
+    try {
+      const restaurant = await Restaurant.findOne({ restaurantId });
+      if (!restaurant) {
+        return "Restaurant not found";
+      }
+
+      return restaurant.menu;
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // Get a specific menu item from a restaurant by its ID
+  getMenuItemByIdFromRestaurant: async (restaurantId, menuItemId) => {
+    try {
+      const restaurant = await Restaurant.findOne({ restaurantId });
+      if (!restaurant) {
+        return "Restaurant not found";
+      }
+
+      const menuItem = restaurant.menu.find(
+        (item) => item.menuId === parseInt(menuItemId)
+      );
+      if (!menuItem) {
+        return "Menu item not found";
+      }
+
+      return menuItem;
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // Update a menu item in a restaurant's menu
+  updateMenuItemInRestaurant: async (
+    restaurantId,
+    menuItemId,
+    updatedMenuItemData
+  ) => {
+    try {
+      const restaurant = await Restaurant.findOne({restaurantId});
+      if (!restaurant) {
+        return "Restaurant not found";
+      }
+
+      const menuItem = restaurant.menu.find(
+        (item) => item.menuId === parseInt(menuItemId)
+      );
+      if (!menuItem) {
+        return "Menu item not found";
+      }
+
+      menuItem.set(updatedMenuItemData);
+      await restaurant.save();
+      return menuItem;
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // Delete a menu item from a restaurant's menu
+  deleteMenuItemFromRestaurant: async (restaurantId, menuItemId) => {
+    try {
+      const restaurant = await Restaurant.findOne({restaurantId});
+      console.log(restaurant);
+      if (!restaurant) {
+        console.log("here");
+        return "Restaurant not found";
+      }
+
+      // Find the index of the menu item to be removed
+        const index = restaurant.menu.findIndex(item => item.menuId === parseInt(menuItemId));
+        if (index === -1) {
+            return "Menu item not found";
+        }
+
+        // Remove the menu item from the array
+        restaurant.menu.splice(index, 1);
+        await restaurant.save();
+      return "Menu item deleted successfully";
+    } catch (err) {
+      throw err;
+    }
   },
 
   // Users methods
@@ -62,9 +166,9 @@ const db = {
     const newUser = new User(data);
     return newUser.save();
   },
-  
+
   getUserByName: (data) => {
-    return User.findOne({ "username":data }).exec();
+    return User.findOne({ username: data }).exec();
   },
 
   getAllUsers: () => {
@@ -73,7 +177,7 @@ const db = {
 
   approveUser: (data) => {
     return User.findByIdAndUpdate(data.id, data, { new: true }).exec();
-  }
+  },
 };
 
 module.exports = db;
