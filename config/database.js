@@ -116,7 +116,7 @@ const db = {
     updatedMenuItemData
   ) => {
     try {
-      const restaurant = await Restaurant.findOne({restaurantId});
+      const restaurant = await Restaurant.findOne({ restaurantId });
       if (!restaurant) {
         return "Restaurant not found";
       }
@@ -139,7 +139,7 @@ const db = {
   // Delete a menu item from a restaurant's menu
   deleteMenuItemFromRestaurant: async (restaurantId, menuItemId) => {
     try {
-      const restaurant = await Restaurant.findOne({restaurantId});
+      const restaurant = await Restaurant.findOne({ restaurantId });
       console.log(restaurant);
       if (!restaurant) {
         console.log("here");
@@ -147,14 +147,16 @@ const db = {
       }
 
       // Find the index of the menu item to be removed
-        const index = restaurant.menu.findIndex(item => item.menuId === parseInt(menuItemId));
-        if (index === -1) {
-            return "Menu item not found";
-        }
+      const index = restaurant.menu.findIndex(
+        (item) => item.menuId === parseInt(menuItemId)
+      );
+      if (index === -1) {
+        return "Menu item not found";
+      }
 
-        // Remove the menu item from the array
-        restaurant.menu.splice(index, 1);
-        await restaurant.save();
+      // Remove the menu item from the array
+      restaurant.menu.splice(index, 1);
+      await restaurant.save();
       return "Menu item deleted successfully";
     } catch (err) {
       throw err;
@@ -177,6 +179,73 @@ const db = {
 
   approveUser: (data) => {
     return User.findByIdAndUpdate(data.id, data, { new: true }).exec();
+  },
+
+  getCartByUsername: async (username) => {
+    try {
+      const user = await User.findOne({ username });
+      if (!user) {
+        console.log("User not found");
+        return null; // Or throw an error if you prefer
+      }
+
+      // Populate cart with menu objects
+      await User.populate(user, {
+        path: "cart",
+        populate: {
+          path: "restaurantId",
+          model: "Restaurant",
+          select: "menu",
+        },
+      });
+
+      return user.cart.map((item) => {
+        const { menuId, restaurantId } = item;
+        const menuObject = restaurantId.menu.find(
+          (menu) => menu.menuId === menuId
+        );
+        return menuObject;
+      });
+    } catch (error) {
+      console.error("Error fetching user cart:", error);
+      throw error;
+    }
+  },
+
+  addToCart: async (username, restaurantId, menuId) => {
+    try {
+      const updatedUser = await User.findOneAndUpdate(
+        { username },
+        { $push: { cart: { menuId, restaurantId } } },
+        { new: true }
+      );
+      if (!updatedUser) {
+        console.log("User not found");
+        return null; // Or throw an error if you prefer
+      }
+      return updatedUser.cart;
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      throw error;
+    }
+  },
+
+  removeFromCart: async (username, restaurantId, menuId) => {
+    try {
+      const updatedUser = await User.findOneAndUpdate(
+        { username },
+        { $pull: { cart: { restaurantId, menuId } } },
+        { new: true }
+      );
+      if (!updatedUser) {
+        console.log("User not found");
+        return null; // Or throw an error if you prefer
+      }
+      return updatedUser.cart;
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+      throw error;
+    }
   },
 };
 

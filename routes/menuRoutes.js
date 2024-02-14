@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/database");
 const { check, validationResult } = require("express-validator");
+const verifyToken = require("../middleware/verifyJwt");
 const auth = require("../middleware/auth");
 
 // Middleware to validate query parameters
@@ -22,22 +23,26 @@ router.use("/api/menus/", (req, res, next) => {
 });
 
 // /api/menus/restaurant/:restaurantId
-router.route("/restaurant/:restaurantId")
+router
+  .route("/restaurant/:restaurantId")
   .get(validateQueryParams, async (req, res) => {
     try {
       const restaurantId = req.params.restaurantId;
       const menuItems = await db.getAllMenuItemsByRestaurantId(restaurantId);
-      
+
       res.status(200).json(menuItems);
     } catch (err) {
       console.error("Error fetching menu items:", err);
       res.status(500).json({ error: "Internal Server Error" });
     }
   })
-  .post(auth, async (req, res) => {
+  .post(auth, verifyToken, async (req, res) => {
     try {
       const restaurantId = req.params.restaurantId;
-      const newMenuItem = await db.addMenuItemToRestaurant(restaurantId, req.body);
+      const newMenuItem = await db.addMenuItemToRestaurant(
+        restaurantId,
+        req.body
+      );
       res.status(201).json(newMenuItem);
     } catch (err) {
       console.error("Error adding new menu item:", err);
@@ -46,34 +51,45 @@ router.route("/restaurant/:restaurantId")
   });
 
 // /api/menus/restaurant/:restaurantId/:menuItemId
-router.route("/restaurant/:restaurantId/:menuItemId")
+router
+  .route("/restaurant/:restaurantId/:menuItemId")
   .get(validateQueryParams, async (req, res) => {
     try {
       const restaurantId = req.params.restaurantId;
       const menuItemId = req.params.menuItemId;
-      const menuItem = await db.getMenuItemByIdFromRestaurant(restaurantId, menuItemId);
+      const menuItem = await db.getMenuItemByIdFromRestaurant(
+        restaurantId,
+        menuItemId
+      );
       res.status(200).json(menuItem);
     } catch (err) {
       console.error("Error fetching menu item:", err);
       res.status(500).json({ error: "Internal Server Error" });
     }
   })
-  .put(auth, async (req, res) => {
+  .put(auth, verifyToken, async (req, res) => {
     try {
       const restaurantId = req.params.restaurantId;
       const menuItemId = req.params.menuItemId;
-      const updatedMenuItem = await db.updateMenuItemInRestaurant(restaurantId, menuItemId, req.body);
+      const updatedMenuItem = await db.updateMenuItemInRestaurant(
+        restaurantId,
+        menuItemId,
+        req.body
+      );
       res.status(200).json(updatedMenuItem);
     } catch (err) {
       console.error("Error updating menu item:", err);
       res.status(500).json({ error: "Internal Server Error" });
     }
   })
-  .delete(auth, async (req, res) => {
+  .delete(auth, verifyToken, async (req, res) => {
     try {
       const restaurantId = req.params.restaurantId;
       const menuItemId = req.params.menuItemId;
-      const result = await db.deleteMenuItemFromRestaurant(restaurantId, menuItemId);
+      const result = await db.deleteMenuItemFromRestaurant(
+        restaurantId,
+        menuItemId
+      );
       if (result) {
         res.status(200).json(result);
       } else {

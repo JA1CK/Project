@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const db = require("./config/database");
 const userRoutes = require("./routes/userRoutes");
@@ -21,6 +22,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
+app.use(cookieParser());
+
 
 // Connect to databases and start the server
 db.initialize(dbUrl)
