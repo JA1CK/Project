@@ -41,7 +41,7 @@ router
   })
   .post(auth, verifyToken, async (req, res) => {
     try {
-      const newRestaurant = await db.addNewRestaurant(req.body);
+      const newRestaurant = await db.addNewRestaurant(req.body.formData);
       res.status(201).json(newRestaurant);
     } catch (err) {
       console.error("Error adding new restaurant:", err);
@@ -68,7 +68,7 @@ router
   .put(auth, verifyToken, async (req, res) => {
     try {
       const updatedRestaurant = await db.updateRestaurantById(
-        req.body,
+        req.body.newRestaurantDetails,
         req.params.restaurantId
       );
       if (updatedRestaurant) {

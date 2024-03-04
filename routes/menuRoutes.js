@@ -41,7 +41,7 @@ router
       const restaurantId = req.params.restaurantId;
       const newMenuItem = await db.addMenuItemToRestaurant(
         restaurantId,
-        req.body
+        req.body.formData
       );
       res.status(201).json(newMenuItem);
     } catch (err) {
@@ -71,12 +71,17 @@ router
     try {
       const restaurantId = req.params.restaurantId;
       const menuItemId = req.params.menuItemId;
+      
       const updatedMenuItem = await db.updateMenuItemInRestaurant(
         restaurantId,
         menuItemId,
-        req.body
+        req.body.editedMenuItem
       );
-      res.status(200).json(updatedMenuItem);
+      if (updatedMenuItem) {
+        res.status(200).json(updatedMenuItem);
+      } else {
+        res.status(404).json({ error: "menuItem not found" });
+      }
     } catch (err) {
       console.error("Error updating menu item:", err);
       res.status(500).json({ error: "Internal Server Error" });

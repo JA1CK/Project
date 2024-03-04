@@ -9,7 +9,6 @@ require("dotenv").config();
 // Middleware to validate query parameters
 const validateQueryParams = [
   check("username").isString(),
-  check("password").isString(),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -27,19 +26,18 @@ router.use("/api/admin/", (req, res, next) => {
 // /api/admin/view
 router
   .route("/view")
-  .get(validateQueryParams, async (req, res) => {
+  .post(validateQueryParams, async (req, res) => {
     try {
       // Get user input
-      const { username, password } = req.body;
+      const { username } = req.body;
   
       // Validate if user exist in our database
       const user = await db.getUserByName(username);
   
-      if (user && user.approved && user.admin && (await bcrypt.compare(password, user.password))) {
+      if (user && user.approved && user.admin) {
         const users = await db.getAllUsers();
         return res.status(200).send(users);
       }
-      
       return res.status(400).send("Invalid Credentials");
     } catch (err) {
       console.log(err);

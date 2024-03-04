@@ -72,16 +72,14 @@ router.route("/login").post(validateQueryParams, async (req, res) => {
     if (user && (await bcrypt.compare(password, user.password))) {
       if (user.approved) {
         // Create token
-        const token = jwt.sign({ user_id: user._id, username }, tokenKey, {
-          expiresIn: "2h",
-        });
+        const token = jwt.sign({ user_id: user._id, username }, tokenKey, {});
 
         res.cookie("token", token, { httpOnly: true });
         res.cookie("isAdmin", user.admin, { httpOnly: true });
         res.cookie("username", user.username, { httpOnly: true });
 
         // user
-        return res.status(200).json({ token: token });
+        return res.status(200).json({ token: token, isAdmin: user.admin });
       }
       return res.status(200).send("Waiting for Approval from Admin.");
     }
@@ -95,13 +93,15 @@ router.route("/login").post(validateQueryParams, async (req, res) => {
 // /api/users/logout
 router.route("/logout").get((req, res) => {
   res.clearCookie("token");
+  res.clearCookie("username");
+  res.clearCookie("isAdmin");
   res.status(200).json({message: "successfully logout"})
 });
 
 // /api/users/viewcart
-router.route("/viewcart").get(verifyToken, async (req, res) => {
+router.route("/viewcart").post(verifyToken, async (req, res) => {
   try {
-    const cart = await db.getCartByUsername(req.cookies.username);
+    const cart = await db.getCartByUsername(req.body.username);
     if (cart) {
       res.status(200).json(cart);
     }
@@ -112,9 +112,9 @@ router.route("/viewcart").get(verifyToken, async (req, res) => {
 });
 
 // /api/users/add-to-cart
-router.route("/add-to-cart").get(verifyToken, async (req, res) => {
+router.route("/add-to-cart").post(verifyToken, async (req, res) => {
   try {
-    const username = req.cookies.username;
+    const username = req.body.username;
     const restaurantId = req.body.restaurantId;
     const menuId = req.body.menuId;
 
@@ -133,10 +133,27 @@ router.route("/add-to-cart").get(verifyToken, async (req, res) => {
 // /api/users/remove-from-cart
 router.route("/remove-from-cart").post(verifyToken, async (req, res) => {
   try {
-    const { restaurantId, menuId } = req.body;
-    const username = req.cookies.username;
+    const { menuId } = req.body;
+    const username = req.body.username;
 
-    const updatedCart = await db.removeFromCart(username, restaurantId, menuId);
+    const updatedCart = await db.removeFromCart(username, menuId);
+    if (updatedCart) {
+      res.status(200).json(updatedCart);
+    } else {
+      res.status(200).json({ message: "Cart not updated" });
+    }
+  } catch (error) {
+    console.error("Error updating cart:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// /api/users/remove-from-cart
+router.route("/checkout").post(verifyToken, async (req, res) => {
+  try {
+    const username = req.body.username;
+
+    const updatedCart = await db.checkOut(username);
     if (updatedCart) {
       res.status(200).json(updatedCart);
     } else {

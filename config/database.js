@@ -13,9 +13,16 @@ const db = {
   },
 
   // Restaurant methods
-  addNewRestaurant: (data) => {
-    const newRestaurant = new Restaurant(data);
-    return newRestaurant.save();
+  addNewRestaurant: async (data) => {
+    try {
+      const count = await Restaurant.countDocuments();
+      const newRestaurant = new Restaurant(data);
+      newRestaurant.restaurantId = count + 1;
+      await newRestaurant.save();
+      console.log("New restaurant added successfully");
+    } catch (error) {
+      console.error("Error:", error);
+    }
   },
 
   getAllRestaurants: (page, perPage, name) => {
@@ -65,7 +72,7 @@ const db = {
       if (!restaurant) {
         return "Restaurant not found";
       }
-
+      menuItemData.menuId = restaurant.menu.length + 1;
       restaurant.menu.push(menuItemData);
       await restaurant.save();
       return restaurant.menu[restaurant.menu.length - 1]; // Return the newly added menu item
@@ -128,7 +135,9 @@ const db = {
         return "Menu item not found";
       }
 
-      menuItem.set(updatedMenuItemData);
+      if (updatedMenuItemData) {
+        menuItem.set(updatedMenuItemData);
+      }
       await restaurant.save();
       return menuItem;
     } catch (err) {
@@ -140,9 +149,7 @@ const db = {
   deleteMenuItemFromRestaurant: async (restaurantId, menuItemId) => {
     try {
       const restaurant = await Restaurant.findOne({ restaurantId });
-      console.log(restaurant);
       if (!restaurant) {
-        console.log("here");
         return "Restaurant not found";
       }
 
@@ -189,6 +196,8 @@ const db = {
         return null; // Or throw an error if you prefer
       }
 
+      return user.cart;
+
       // Populate cart with menu objects
       await User.populate(user, {
         path: "cart",
@@ -230,11 +239,11 @@ const db = {
     }
   },
 
-  removeFromCart: async (username, restaurantId, menuId) => {
+  removeFromCart: async (username, menuId) => {
     try {
       const updatedUser = await User.findOneAndUpdate(
         { username },
-        { $pull: { cart: { restaurantId, menuId } } },
+        { $pull: { cart: { menuId } } },
         { new: true }
       );
       if (!updatedUser) {
@@ -244,6 +253,24 @@ const db = {
       return updatedUser.cart;
     } catch (error) {
       console.error("Error removing from cart:", error);
+      throw error;
+    }
+  },
+
+  checkOut: async (username) => {
+    try {
+      const updatedUser = await User.findOneAndUpdate(
+        { username },
+        { $set: { cart: [] } }, // Empty the cart array
+        { new: true }
+      );
+      if (!updatedUser) {
+        console.log("User not found");
+        return null; // Or throw an error if you prefer
+      }
+      return updatedUser.cart;
+    } catch (error) {
+      console.error("Error checking out:", error);
       throw error;
     }
   },
