@@ -1,5 +1,8 @@
 # Project README
 
+# Team Name: ReactRangers
+# Team Members: Jainish Patel, Aditya Joshi, Param Gandhi
+
 Welcome to the ReactRanger's Server Project repository! This repository contains the source code for a web application built with Node.js and Express.js. This application provides functionalities for managing restaurants, menus, user registration, and authentication. Below is a brief overview of the project structure, functionality, and assigned tasks:
 
 ## Project Structure
